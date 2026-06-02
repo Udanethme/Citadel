@@ -1,0 +1,190 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Custom RPG student profile containing study metrics, stream choice, XP and Aetherium level",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID"
+        },
+        "username": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "stream": {
+          "type": "string",
+          "enum": ["Biological Science", "Physical Science/Maths", ""]
+        },
+        "xp": {
+          "type": "integer"
+        },
+        "aetherium": {
+          "type": "integer"
+        },
+        "level": {
+          "type": "integer"
+        },
+        "dailyStreak": {
+          "type": "integer"
+        },
+        "totalStudyMinutes": {
+          "type": "integer"
+        },
+        "physicsXp": {
+          "type": "integer"
+        },
+        "chemistryXp": {
+          "type": "integer"
+        },
+        "mathsXp": {
+          "type": "integer"
+        },
+        "biologyXp": {
+          "type": "integer"
+        },
+        "joinedGuildId": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["username", "email", "stream", "xp", "aetherium", "level"]
+    },
+    "StudyLog": {
+      "title": "Study Log",
+      "description": "Represents a single Pomodoro focus verification log",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "minutes": {
+          "type": "integer"
+        },
+        "xpGained": {
+          "type": "integer"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "subject", "minutes", "xpGained"]
+    },
+    "Duel": {
+      "title": "Focus Duel",
+      "description": "1v1 PvP real-time challenge between students",
+      "type": "object",
+      "properties": {
+        "challengerId": {
+          "type": "string"
+        },
+        "challengerUsername": {
+          "type": "string"
+        },
+        "challengeeId": {
+          "type": "string"
+        },
+        "challengeeUsername": {
+          "type": "string"
+        },
+        "xpBet": {
+          "type": "integer"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "in_progress", "completed", "declined"]
+        },
+        "challengerStudyMinutesActual": {
+          "type": "integer"
+        },
+        "challengeeStudyMinutesActual": {
+          "type": "integer"
+        },
+        "challengerActive": {
+          "type": "boolean"
+        },
+        "challengeeActive": {
+          "type": "boolean"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "winnerId": {
+          "type": "string"
+        },
+        "loserId": {
+          "type": "string"
+        }
+      },
+      "required": ["challengerId", "challengeeId", "xpBet", "status"]
+    },
+    "Guild": {
+      "title": "Guild",
+      "description": "Co-op Guild challenge and social unit",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "membersCount": {
+          "type": "integer"
+        },
+        "totalXp": {
+          "type": "integer"
+        },
+        "activeChallengeTitle": {
+          "type": "string"
+        },
+        "activeChallengeTargetMinutes": {
+          "type": "integer"
+        },
+        "activeChallengeCurrentMinutes": {
+          "type": "integer"
+        },
+        "activeChallengeXpReward": {
+          "type": "integer"
+        }
+      },
+      "required": ["name", "membersCount", "totalXp"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "User profiles indexed by Auth UID"
+    },
+    "users/{userId}/studyLogs/{logId}": {
+      "schema": "StudyLog",
+      "description": "Individual subject focus logs for daily streak and tracker validation"
+    },
+    "duels/{duelId}": {
+      "schema": "Duel",
+      "description": "Real-time 1v1 Pomodoro challenges"
+    },
+    "guilds/{guildId}": {
+      "schema": "Guild",
+      "description": "Public Co-Op study guilds"
+    }
+  }
+}

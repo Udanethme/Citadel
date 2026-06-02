@@ -1,0 +1,88 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Reusable primitive helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Entity-specific validation rules
+    function isValidUser(data) {
+      return data.keys().hasAll(['username', 'email', 'stream', 'xp', 'aetherium', 'level'])
+        && data.username is string && data.username.size() >= 1 && data.username.size() <= 100
+        && data.email is string && data.email.size() <= 128
+        && data.stream in ["Biological Science", "Physical Science/Maths", ""]
+        && data.xp is int && data.xp >= 0
+        && data.aetherium is int && data.aetherium >= 0
+        && data.level is int && data.level >= 1;
+    }
+
+    function isValidStudyLog(data, userId) {
+      return data.keys().hasAll(['uid', 'subject', 'minutes', 'xpGained'])
+        && data.uid == userId
+        && data.subject is string && data.subject.size() <= 100
+        && data.minutes is int && data.minutes >= 0
+        && data.xpGained is int && data.xpGained >= 0;
+    }
+
+    function isValidDuel(data) {
+      return data.keys().hasAll(['challengerId', 'challengeeId', 'xpBet', 'status'])
+        && data.challengerId is string && data.challengerId.size() <= 128
+        && data.challengeeId is string && data.challengeeId.size() <= 128
+        && data.xpBet is int && data.xpBet >= 0
+        && data.status in ["pending", "in_progress", "completed", "declined"];
+    }
+
+    function isValidGuild(data) {
+      return data.keys().hasAll(['name', 'membersCount', 'totalXp'])
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.membersCount is int && data.membersCount >= 0
+        && data.totalXp is int && data.totalXp >= 0;
+    }
+
+    // Collection Level Constraints
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data);
+    }
+
+    match /users/{userId}/studyLogs/{logId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidStudyLog(request.resource.data, userId);
+      allow update: if isOwner(userId) && isValidStudyLog(request.resource.data, userId);
+      allow delete: if isOwner(userId);
+    }
+
+    match /duels/{duelId} {
+      allow read: if isSignedIn() && (
+        request.auth.uid == resource.data.challengerId || 
+        request.auth.uid == resource.data.challengeeId
+      );
+      
+      allow create: if isSignedIn() 
+        && request.auth.uid == request.resource.data.challengerId
+        && isValidDuel(request.resource.data);
+
+      allow update: if isSignedIn() && (
+        request.auth.uid == resource.data.challengerId || 
+        request.auth.uid == resource.data.challengeeId
+      ) && isValidDuel(request.resource.data);
+    }
+
+    match /guilds/{guildId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidGuild(request.resource.data);
+    }
+  }
+}

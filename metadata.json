@@ -1,0 +1,6 @@
+{
+  "name": "Z-Score Citadel",
+  "description": "A gamified, real-time Pomodoro Study Solarpunk RPG for Sri Lankan GCE A/L Science students with 1v1 focus duels and co-op guild challenges.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
